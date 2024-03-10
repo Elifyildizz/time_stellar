@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 class TodoService {
   final String url = "https://dummyjson.com/todos/";
+  final String addUrl = "https://dummyjson.com/todos/add";
 
   //Respond time ve asenkron
   Future<List<Todo>> getUncompletedTodos() async {
@@ -35,5 +36,17 @@ class TodoService {
     });
 
     return todos;
+  }
+
+  Future<String> addTodo(Todo newTodo) async {
+    final response = await http.post(
+      Uri.parse(addUrl),
+      headers: <String, String>{
+        "Content-Type": "application/json; charset=UTF-8"
+      },
+      body: json.encode(newTodo.toJson()),
+    );
+    print(response.body);
+    return response.body;
   }
 }

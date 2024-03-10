@@ -11,6 +11,7 @@ class TodoItem extends StatefulWidget {
 
 class _TodoItemState extends State<TodoItem> {
   bool isChecked = false;
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -23,47 +24,40 @@ class _TodoItemState extends State<TodoItem> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            /* FIREBASEDE BAKACAGIM
-            widget.task.type == TaskType.notes
-                ? Image.asset("lib/assets/images/open-book.png")
-                : widget.task.type == TaskType.contest
-                    ? Image.asset("lib/assets/images/running-shoes.png")
-                    : Image.asset("lib/assets/images/yoga.png"),
-            */
-            Image.asset("lib/assets/images/open-book.png"),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Image.asset("lib/assets/images/categorytask.png"),
+            ),
             Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     widget.task.todo!,
+                    textAlign: TextAlign.left,
                     style: TextStyle(
+                      fontWeight: FontWeight.bold,
                       decoration: widget.task.completed!
                           ? TextDecoration.lineThrough
                           : TextDecoration.none,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 21,
+                      fontSize: 16,
                     ),
                   ),
                   Text(
                     "User: ${widget.task.userId!}",
-                    style: TextStyle(
-                      decoration: widget.task.completed!
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
-                    ),
+                    textAlign: TextAlign.left,
                   ),
+                  //desc buraya gelsin
                 ],
               ),
             ),
             Checkbox(
               value: isChecked,
               onChanged: (val) => {
-                setState(
-                  () {
-                    widget.task.completed = !widget.task.completed!;
-                    isChecked = val!;
-                  },
-                )
+                setState(() {
+                  isChecked = val!;
+                  widget.task.completed = !widget.task.completed!;
+                })
               },
             )
           ],

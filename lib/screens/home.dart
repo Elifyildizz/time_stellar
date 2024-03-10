@@ -69,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
     double deviceWidth = MediaQuery.of(context).size.width;
     //SafeArea widget'ı bildirim çubuğunu uygulamadan ayırır
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: SafeArea(
         child: Scaffold(
           backgroundColor: HexColor(backgroundColor),
@@ -77,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
               //Header
               Container(
                 width: deviceWidth,
-                height: deviceHeight / 3,
+                height: deviceHeight / 4,
                 decoration: const BoxDecoration(
                     color: Colors.purple,
                     image: DecorationImage(
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Padding(
                       padding: EdgeInsets.only(top: 20),
                       child: Text(
-                        "January 17, 2024",
+                        "March 7, 2024",
                         style: TextStyle(
                             color: Colors.pink,
                             fontSize: 18,
@@ -111,6 +112,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               //Scrolling page for todos = Expanded
               //Top Column
+              const Padding(
+                padding: EdgeInsets.only(left: 20, top: 10),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "To Do",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                ),
+              ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),

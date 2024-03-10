@@ -3,6 +3,9 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:time_stellar/constants/color.dart';
 import 'package:time_stellar/constants/tasktype.dart';
 import 'package:time_stellar/model/task.dart';
+import 'package:time_stellar/model/todo.dart';
+import 'package:time_stellar/service/todo_service.dart';
+import 'package:intl/intl.dart';
 
 class AddNewTaskScreen extends StatefulWidget {
   const AddNewTaskScreen({super.key, required this.addNewTask});
@@ -16,6 +19,8 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   TextEditingController dateController = TextEditingController();
   TextEditingController timeController = TextEditingController();
   TextEditingController descController = TextEditingController();
+
+  TodoService todoService = TodoService();
 
   TaskType taskType = TaskType.notes;
 
@@ -53,7 +58,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                     ),
                     const Expanded(
                       child: Padding(
-                        padding: EdgeInsets.only(top: 10),
+                        padding: EdgeInsets.only(top: 10, right: 60),
                         child: Text(
                           "Create a Task",
                           style: TextStyle(
@@ -76,6 +81,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                       filled: true, fillColor: Colors.white),
                 ),
               ),
+              //Category Selection widget halinde custom selection yapmak istiyorum.
               Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Row(
@@ -87,45 +93,43 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             duration: Duration(milliseconds: 300),
-                            content: Text("Category Selected"),
-                          ),
-                        );
-                        setState(() {
-                          taskType = TaskType.notes;
-                        });
-                      },
-                      child: Image.asset("lib/assets/images/open-book.png"),
-                    ),
-                    /*
-                    GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            duration: Duration(milliseconds: 300),
-                            content: Text("Category Selected"),
+                            content: Text("Category Selected 'Event'"),
                           ),
                         );
                         setState(() {
                           taskType = TaskType.calendar;
                         });
                       },
-                      child: Image.asset("lib/assets/images/yoga.png"),
+                      child: Image.asset("lib/assets/images/categoryevent.png"),
                     ),
                     GestureDetector(
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             duration: Duration(milliseconds: 300),
-                            content: Text("Category Selected"),
+                            content: Text("Category Selected 'Goal'"),
                           ),
                         );
                         setState(() {
                           taskType = TaskType.contest;
                         });
                       },
-                      child: Image.asset("lib/assets/images/running-shoes.png"),
+                      child: Image.asset("lib/assets/images/categorygoal.png"),
                     ),
-                    */
+                    GestureDetector(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            duration: Duration(milliseconds: 300),
+                            content: Text("Category Selected 'Reminder'"),
+                          ),
+                        );
+                        setState(() {
+                          taskType = TaskType.notes;
+                        });
+                      },
+                      child: Image.asset("lib/assets/images/categorytask.png"),
+                    ),
                   ],
                 ),
               ),
@@ -136,6 +140,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                     Expanded(
                       child: Column(
                         children: [
+                          //date
                           const Text("Date"),
                           Padding(
                               padding:
@@ -143,7 +148,16 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                               child: TextField(
                                 controller: dateController,
                                 decoration: const InputDecoration(
-                                    filled: true, fillColor: Colors.white),
+                                    filled: true,
+                                    prefixIcon: Icon(Icons.calendar_today),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.blue)),
+                                    fillColor: Colors.white),
+                                readOnly: true,
+                                onTap: () {
+                                  selectDate();
+                                },
                               ))
                         ],
                       ),
@@ -153,13 +167,20 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                         children: [
                           const Text("Time"),
                           Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: TextField(
-                                controller: timeController,
-                                decoration: const InputDecoration(
-                                    filled: true, fillColor: Colors.white),
-                              ))
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: GestureDetector(
+                              onTap: () {
+                                selectTime();
+                              },
+                              child: AbsorbPointer(
+                                child: TextField(
+                                  controller: timeController,
+                                  decoration: const InputDecoration(
+                                      filled: true, fillColor: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -181,13 +202,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
               ),
               ElevatedButton(
                   onPressed: () {
-                    Task newTask = Task(
-                      type: taskType,
-                      title: titleController.text,
-                      desc: descController.text,
-                      isCompleted: false,
-                    );
-                    widget.addNewTask(newTask);
+                    saveTodo();
                     Navigator.pop(context);
                   },
                   child: const Text("Save"))
@@ -196,5 +211,44 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> selectTime() async {
+    TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (pickedTime != null) {
+      setState(
+        () {
+          timeController.text = pickedTime.format(context);
+        },
+      );
+    }
+  }
+
+  Future<void> selectDate() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2100),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        dateController.text = DateFormat('dd-MM-yyyy').format(pickedDate);
+      });
+    }
+  }
+
+  void saveTodo() {
+    Todo newTodo = Todo(
+      id: -1,
+      todo: titleController.text,
+      completed: false,
+      //date
+      userId: int.parse(dateController.text),
+    );
+    todoService.addTodo(newTodo);
   }
 }
